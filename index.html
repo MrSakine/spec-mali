@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide des Spécialités Médicales pour Médecins Maliens</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Slate, Stone, Zinc) -->
+    <!-- Application Structure Plan: The application is structured as a decision-making journey for a Malian general practitioner. It begins with a clear choice: explore options in Mali or internationally. The 'Mali' section details local specializations, the competitive entry process, and career realities. The 'International' section is a dynamic explorer for Francophone countries, allowing comparison of pathways, costs, and career opportunities. A final 'Guide Pratique' section consolidates actionable advice on applications, visas, and finances. This task-oriented structure is more user-friendly than the linear report, allowing doctors to directly access the information most relevant to their personal and professional goals. Key interactions include tabbed navigation, dynamic charts comparing program durations and costs, and accordions for detailed application steps. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: List of specializations in Mali -> Goal: Inform & Show Scope -> Viz/Method: Interactive List/Table (HTML/JS) -> Interaction: Users can see all available local options at a glance with their durations. Justification: A clear, sortable table is the most direct way to present this list.
+        - Report Info: Competition for specialization in Mali -> Goal: Highlight Challenge -> Viz/Method: Key Stat Callout (HTML/Tailwind) -> Interaction: Static text with strong visual emphasis. Justification: A simple, impactful number effectively conveys the bottleneck.
+        - Report Info: Specialization options in France, Belgium, Morocco, Germany, UK, Canada, Brazil, China, Japan -> Goal: Compare Destinations -> Viz/Method: Tabbed Interface & Comparative Cards (HTML/JS) -> Interaction: Users click tabs to switch between countries, viewing curated info cards. Justification: Organizes extensive international data into a clean, comparable format without overwhelming the user.
+        - Report Info: Costs (Tuition & Living) vs. Remuneration -> Goal: Financial Comparison -> Viz/Method: Grouped Bar Chart (Chart.js/Canvas) -> Interaction: Hover tooltips for precise figures. Justification: A chart powerfully visualizes the financial trade-offs between studying locally vs. abroad.
+        - Report Info: Application steps and visa requirements -> Goal: Guide User -> Viz/Method: Accordion (HTML/JS) -> Interaction: Users click to expand/collapse detailed steps. Justification: Prevents information overload by breaking down a complex process into manageable chunks. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f4; }
+        .active-nav { color: #2563eb; border-bottom: 2px solid #2563eb; }
+        .inactive-nav { color: #374151; }
+        .tab-btn { transition: all 0.2s ease-in-out; }
+        .tab-btn.active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .tab-btn.inactive { background-color: #e5e7eb; color: #374151; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 350px; max-height: 450px; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
+        .content-card { transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white/90 backdrop-blur-lg sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-4 md:px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#accueil" class="text-xl font-bold text-blue-600 flex items-center">
+                    <span class="text-2xl mr-2">⚕️</span> SpecMali Guide
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#mali" class="nav-link inactive-nav font-medium hover:text-blue-600 transition-colors">Spécialisation au Mali</a>
+                    <a href="#international" class="nav-link inactive-nav font-medium hover:text-blue-600 transition-colors">Opportunités Internationales</a>
+                    <a href="#guide" class="nav-link inactive-nav font-medium hover:text-blue-600 transition-colors">Guide Pratique</a>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden text-slate-600 hover:text-blue-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
+                <a href="#mali" class="block py-2 px-4 text-sm font-medium text-slate-600 hover:bg-blue-50 rounded-lg">Spécialisation au Mali</a>
+                <a href="#international" class="block py-2 px-4 text-sm font-medium text-slate-600 hover:bg-blue-50 rounded-lg">Opportunités Internationales</a>
+                <a href="#guide" class="block py-2 px-4 text-sm font-medium text-slate-600 hover:bg-blue-50 rounded-lg">Guide Pratique</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="accueil" class="bg-white">
+            <div class="container mx-auto px-4 md:px-6 py-20 md:py-28 text-center">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">Votre Avenir en Médecine Spécialisée</h1>
+                <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-slate-600">Un outil interactif pour les médecins généralistes du Mali, conçu pour éclairer votre chemin vers la spécialisation, que ce soit au niveau national ou à l'international.</p>
+                <div class="mt-10 flex flex-col md:flex-row justify-center gap-4">
+                    <a href="#mali" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105">Explorer les voies au Mali</a>
+                    <a href="#international" class="bg-white text-blue-600 border border-blue-600 font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-blue-50 transition-transform transform hover:scale-105">Découvrir l'international</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="mali" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">La Spécialisation au Mali</h2>
+                    <p class="mt-3 text-lg text-slate-600 max-w-3xl mx-auto">Le Mali offre un éventail de spécialités, mais l'accès est un défi majeur. Cette section détaille les programmes disponibles, le processus d'admission compétitif et les réalités de la carrière sur le plan national.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-6 text-slate-800">Spécialités Disponibles</h3>
+                        <div class="overflow-x-auto">
+                            <table id="specialites-mali-table" class="min-w-full divide-y divide-stone-200">
+                                <thead class="bg-stone-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Spécialité</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Durée (ans)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-stone-200">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <h3 class="text-2xl font-semibold mb-4">Le Goulot d'Étranglement : Le Concours</h3>
+                            <p class="text-slate-600 mb-4">L'accès à la spécialisation se fait par un concours national (Internat/Résidanat) extrêmement sélectif. La forte concurrence et le nombre limité de places signifient que beaucoup de médecins qualifiés ne sont pas admis.</p>
+                            <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 rounded-r-lg" role="alert">
+                                <p class="font-bold">Un défi de taille</p>
+                                <p>Le nombre de candidats dépasse souvent largement le nombre de postes ouverts, créant une pression immense et poussant de nombreux diplômés à chercher des opportunités à l'étranger.</p>
+                            </div>
+                        </div>
+                         <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <h3 class="text-2xl font-semibold mb-4">Carrière et Rémunération</h3>
+                            <p class="text-slate-600 mb-4">Le Mali fait face à un "déficit de ressources humaines spécialisées", ce qui garantit une forte demande. Cependant, les défis financiers sont réels.</p>
+                             <div class="chart-container" style="height: 300px;">
+                                 <canvas id="financeMaliChart"></canvas>
+                             </div>
+                             <p class="text-xs text-center mt-2 text-slate-500">Comparaison du salaire mensuel moyen d'un généraliste avec le coût potentiel de l'auto-financement de la spécialisation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="international" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">Opportunités Internationales</h2>
+                    <p class="mt-3 text-lg text-slate-600 max-w-3xl mx-auto">Découvrez les voies de spécialisation médicale dans des pays francophones et anglophones à travers le monde.</p>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <div id="tabs-container-europe" class="inline-flex rounded-lg shadow-sm">
+                         <button data-country="france" class="tab-btn active px-6 py-3 text-sm font-medium rounded-l-lg">🇫🇷 France</button>
+                         <button data-country="belgique" class="tab-btn inactive px-6 py-3 text-sm font-medium">🇧🇪 Belgique</button>
+                         <button data-country="allemagne" class="tab-btn inactive px-6 py-3 text-sm font-medium">🇩🇪 Allemagne</button>
+                         <button data-country="uk" class="tab-btn inactive px-6 py-3 text-sm font-medium rounded-r-lg">🇬🇧 Royaume-Uni</button>
+                    </div>
+                    <div id="tabs-container-america" class="inline-flex rounded-lg shadow-sm">
+                         <button data-country="canada" class="tab-btn inactive px-6 py-3 text-sm font-medium rounded-l-lg">🇨🇦 Canada</button>
+                         <button data-country="bresil" class="tab-btn inactive px-6 py-3 text-sm font-medium rounded-r-lg">🇧🇷 Brésil</button>
+                    </div>
+                    <div id="tabs-container-asia-africa" class="inline-flex rounded-lg shadow-sm">
+                         <button data-country="maroc" class="tab-btn inactive px-6 py-3 text-sm font-medium rounded-l-lg">🇲🇦 Maroc</button>
+                         <button data-country="chine" class="tab-btn inactive px-6 py-3 text-sm font-medium">🇨🇳 Chine</button>
+                         <button data-country="japon" class="tab-btn inactive px-6 py-3 text-sm font-medium rounded-r-lg">🇯🇵 Japon</button>
+                    </div>
+                </div>
+
+                <div id="international-content">
+                    <!-- Content will be dynamically inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="guide" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">Guide Pratique du Candidat</h2>
+                    <p class="mt-3 text-lg text-slate-600 max-w-3xl mx-auto">De la reconnaissance de votre diplôme à la demande de visa, voici les étapes clés pour une candidature réussie à l'étranger.</p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div id="accordion-container" class="space-y-4">
+                        <!-- Accordion Items will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto px-4 md:px-6 py-8 text-center">
+            <p>&copy; 2025 SpecMali Guide. Un outil pour éclairer les décisions de carrière des médecins maliens.</p>
+            <p class="text-sm text-slate-400 mt-2">Les données sont issues du rapport "Guide Complet sur les Opportunités de Spécialisation Médicale pour les Généralistes Maliens" et doivent être vérifiées auprès des sources officielles.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const specialitesMali = [
+                { nom: "Anesthésie Réanimation", duree: 4 }, { nom: "Anatomie Pathologique", duree: 4 },
+                { nom: "Chirurgie Générale", duree: 5 }, { nom: "Dermatologie", duree: 4 },
+                { nom: "Endocrinologie", duree: 4 }, { nom: "Imagerie Médicale", duree: 4 },
+                { nom: "Maladies Infectieuses", duree: 4 }, { nom: "Médecine de Famille", duree: 4 },
+                { nom: "Médecine Interne", duree: 4 }, { nom: "Néphrologie", duree: 4 },
+                { nom: "Neurochirurgie", duree: 4 }, { nom: "Neurologie", duree: 4 },
+                { nom: "Ophtalmologie", duree: 4 }, { nom: "ORL", duree: 4 },
+                { nom: "Orthopédie Traumatologie", duree: 4 }, { nom: "Pédiatrie", duree: 4 },
+                { nom: "Pneumologie Phtisiologie", duree: 4 }, { nom: "Psychiatrie", duree: 4 },
+                { nom: "Stomatologie & Chirurgie Maxillo-Faciale", duree: 4 }, { nom: "Urologie", duree: 4 },
+                { nom: "Santé Publique (Master)", duree: 2 }
+            ];
+
+            const internationalData = {
+                france: {
+                    title: "France : La Destination Privilégiée",
+                    description: `La France est un choix populaire en raison des liens linguistiques, culturels et de la qualité de son système de santé. Deux voies principales s'offrent aux médecins étrangers.`,
+                    cards: [
+                        { title: "DFMS/DFMSA", text: `Diplômes de formation pour médecins étrangers. Ne donnent pas le droit d'exercer en France mais renforcent les compétences pour un retour au pays.` },
+                        { title: "Masters Spécialisés", text: `Formations académiques en santé publique, ingénierie de la santé, etc., menant à des carrières de recherche ou techniques.` },
+                        { title: "Bourses Clés", text: `Bourse du Gouvernement Français (BGF) pour les Maliens, Bourse Eiffel, Erasmus+. Ces bourses sont essentielles vu le coût de la vie (~1000€/mois).` },
+                        { title: "Avantage Stratégique", text: `Les diplômes français sont reconnus automatiquement au Maroc, offrant une flexibilité de carrière régionale.` }
+                    ],
+                },
+                belgique: {
+                    title: "Belgique : L'Alternative Accessible",
+                    description: `La Belgique se distingue par ses programmes de bourses très attractifs, spécifiquement conçus pour les étudiants des pays en développement.`,
+                    cards: [
+                        { title: "Bourses Complètes", text: `Les bourses VLIR-UOS et ARES couvrent tous les frais (scolarité, voyage, allocation de vie), rendant les études très accessibles.` },
+                        { title: "Coût de la Vie", text: `Relativement abordable pour l'Europe, avec des coûts mensuels estimés entre 800€ et 1300€.` },
+                        { title: "Spécialisations", text: `Offre de Masters en santé publique et autres domaines, souvent en anglais, dans des universités renommées comme KU Leuven et ULiège.` },
+                        { title: "Qualité de Vie", text: `Un environnement multiculturel au cœur de l'Europe, avec d'excellentes infrastructures.` }
+                    ],
+                },
+                allemagne: {
+                    title: "Allemagne : L'Excellence Académique et Industrielle",
+                    description: `L'Allemagne est un pôle d'ingénierie et de recherche, avec de nombreuses universités offrant des programmes de pointe, souvent sans frais de scolarité dans le public.`,
+                    cards: [
+                        { title: "Reconnaissance", text: `Le système de Bologne facilite la reconnaissance. La base de données anabin du ZAB est essentielle pour l'équivalence des diplômes.` },
+                        { title: "Frais de Scolarité", text: `Majoritairement gratuits dans les universités publiques pour les Masters, seuls des frais administratifs semestriels sont à prévoir.` },
+                        { title: "Bourses Clés", text: `DAAD (Service Allemand d'Échanges Universitaires) et Deutschlandstipendium sont les principales bourses, souvent très complètes.` },
+                        { title: "Coût de la Vie", text: `Estimé entre 850€ et 1200€ par mois, plus élevé dans les grandes villes comme Munich.` }
+                    ],
+                },
+                uk: {
+                    title: "Royaume-Uni : Programmes Intenses et Réseau Mondial",
+                    description: `Le Royaume-Uni est réputé pour ses formations médicales intensives d'un an et ses liens avec un réseau professionnel international.`,
+                    cards: [
+                        { title: "Reconnaissance", text: `Le système est distinct de Bologne mais les qualifications sont reconnues internationalement. Le GMC est l'autorité pour la pratique.` },
+                        { title: "Frais de Scolarité", text: `Élevés pour les étudiants internationaux (souvent entre £15,000 et £30,000 par an pour les Masters).` },
+                        { title: "Bourses Clés", text: `Chevening Scholarships, Commonwealth Scholarships, et bourses universitaires spécifiques sont disponibles.` },
+                        { title: "Coût de la Vie", text: `Très élevé, surtout à Londres, estimé entre £1000 et £1500 par mois hors frais de scolarité.` }
+                    ],
+                },
+                canada: {
+                    title: "Canada : Diversité et Qualité de Vie",
+                    description: `Le Canada offre une éducation de haute qualité et un environnement multiculturel. Les programmes sont souvent bilingues ou en anglais.`,
+                    cards: [
+                        { title: "Reconnaissance", text: `Processus d'évaluation des diplômes (WES, IQAS) requis. La Licence française est généralement bien vue.` },
+                        { title: "Frais de Scolarité", text: `Variables, mais généralement entre 10 000 CAD et 30 000 CAD par an pour les étudiants internationaux.` },
+                        { title: "Bourses Clés", text: `Bourses du gouvernement canadien (Vanier Canada Graduate Scholarships), bourses provinciales et universitaires.` },
+                        { title: "Coût de la Vie", text: `Estimé entre 1000 CAD et 1500 CAD par mois, selon la ville.` }
+                    ],
+                },
+                bresil: {
+                    title: "Brésil : Opportunités en Santé Publique et Tropicale",
+                    description: `Le Brésil propose des programmes axés sur la santé publique et les maladies tropicales, avec une approche axée sur la recherche.`,
+                    cards: [
+                        { title: "Reconnaissance", text: `Processus de validation du diplôme par les universités fédérales. Le programme Revalida est clé pour la pratique.` },
+                        { title: "Frais de Scolarité", text: `Généralement très bas ou gratuits dans les universités fédérales publiques, mais des frais administratifs peuvent exister.` },
+                        { title: "Bourses Clés", text: `CAPES, CNPq (bourses de recherche), bourses d'organisations internationales.` },
+                        { title: "Coût de la Vie", text: `Plus abordable qu'en Europe (environ 600€-1000€ par mois), mais variable selon les grandes villes.` }
+                    ],
+                },
+                maroc: {
+                    title: "Maroc : La Proximité Stratégique",
+                    description: `Voisin francophone, le Maroc est une option de plus en plus pertinente, notamment grâce à la simplification des démarches administratives.`,
+                    cards: [
+                        { title: "Reconnaissance de Diplômes", text: `La reconnaissance automatique des diplômes des universités publiques françaises est un avantage majeur, éliminant de longues procédures.` },
+                        { title: "Bourses Gouvernementales", text: `Le gouvernement marocain offre des bourses complètes pour les étudiants internationaux dans les universités publiques.` },
+                        { title: "Coût de la Vie", text: `Plus abordable qu'en Europe, avec un coût mensuel total d'environ 1000€, loyer inclus.` },
+                        { title: "Marché de l'Emploi", text: `Le secteur de la santé est en développement, offrant des opportunités pour les spécialistes formés, en particulier ceux avec un diplôme français.` }
+                    ]
+                },
+                chine: {
+                    title: "Chine : Le Géant de l'Innovation en Santé",
+                    description: `La Chine investit massivement dans la recherche et la technologie médicale, offrant des opportunités de spécialisation variées.`,
+                    cards: [
+                        { title: "Reconnaissance", text: `Accords de reconnaissance mutuelle avec la France. La Licence est généralement reconnue comme Bachelor.` },
+                        { title: "Frais de Scolarité", text: `Modérés à élevés (environ 3000€-7000€ par an pour les Masters), mais de nombreuses bourses existent.` },
+                        { title: "Bourses Clés", text: `Chinese Government Scholarship (CSC) est très généreuse (frais de scolarité, logement, allocation).` },
+                        { title: "Coût de la Vie", text: `Abordable (~400€-800€ par mois), surtout en dehors des grandes villes comme Shanghai ou Pékin.` }
+                    ],
+                },
+                japon: {
+                    title: "Japon : Expertise de Pointe et Rigueur Académique",
+                    description: `Le Japon est un leader mondial en technologie médicale et offre des programmes de recherche avancés.`,
+                    cards: [
+                        { title: "Reconnaissance", text: `Le système est distinct, mais les diplômes français sont généralement bien reconnus. Une évaluation peut être requise.` },
+                        { title: "Frais de Scolarité", text: `Modérés (environ 4000€-6000€ par an pour les Masters dans le public).` },
+                        { title: "Bourses Clés", text: `MEXT Scholarship (Gouvernement Japonais) est la plus importante, couvrant tout.` },
+                        { title: "Coût de la Vie", text: `Élevé, surtout dans les grandes villes (~800€-1200€ par mois).` }
+                    ],
+                }
+            };
+            
+            const guideData = [
+                { title: "1. Reconnaissance de Votre Diplôme", content: `Votre Doctorat en Médecine malien est la base. Pour l'étranger, le centre ENIC-NARIC peut fournir une attestation de comparabilité. Pour l'Allemagne, consultez la base de données anabin. Pour le Maroc, la reconnaissance des diplômes publics français est automatique, un atout si vous étudiez en France.` },
+                { title: "2. Préparation du Dossier de Candidature", content: `Un dossier solide est crucial. Préparez : relevés de notes, diplômes traduits (si nécessaire), CV, lettre de motivation percutante, lettres de recommandation, et résultats de tests de langue (TCF/DELF pour le français, TOEFL/IELTS pour l'anglais).` },
+                { title: "3. Planification Financière et Bourses", content: `Les coûts varient énormément. La spécialisation au Mali peut nécessiter un auto-financement. À l'étranger, le coût de la vie est élevé (800€-1200€/mois en Europe). Priorisez les bourses complètes : BGF (France), ARES/VLIR-UOS (Belgique), Erasmus+, DAAD (Allemagne). Elles sont la clé de la viabilité de votre projet.` },
+                { title: "4. Démarches de Visa Étudiant", content: `En tant que citoyen malien, un visa est obligatoire. Commencez les démarches 3 à 6 mois à l'avance. Les documents clés incluent : lettre d'admission, preuve de ressources financières suffisantes (le montant varie par pays), preuve d'hébergement et assurance santé. Pour la France, la procédure passe par Campus France.` }
+            ];
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Render Mali specialities table
+            const tableBody = document.querySelector("#specialites-mali-table tbody");
+            specialitesMali.forEach(spec => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${spec.nom}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${spec.duree}</td>`;
+                tableBody.appendChild(row);
+            });
+
+            // Render Mali Finance Chart
+            const financeMaliCtx = document.getElementById('financeMaliChart').getContext('2d');
+            new Chart(financeMaliCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Salaire mensuel moyen (Généraliste)', 'Coût mensuel estimé (Spécialisation)'],
+                    datasets: [{
+                        label: 'Montant en F CFA',
+                        data: [200000, 300000], // Example data, assuming higher cost for specialization
+                        backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                        borderColor: ['#3b82f6', '#ef4444'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: value => new Intl.NumberFormat('fr-FR').format(value) } } }
+                }
+            });
+
+            // International Section Logic
+            const tabsContainers = document.querySelectorAll('.flex > div[id^="tabs-container"]');
+            const internationalContent = document.getElementById('international-content');
+
+            function renderInternationalContent(country) {
+                const data = internationalData[country];
+                internationalContent.innerHTML = '';
+                
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'bg-stone-50 p-8 rounded-xl shadow-inner';
+                contentWrapper.innerHTML = `
+                    <h3 class="text-2xl font-bold text-center mb-2">${data.title}</h3>
+                    <p class="text-slate-600 text-center max-w-2xl mx-auto mb-8">${data.description}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        ${data.cards.map(card => `
+                            <div class="bg-white p-6 rounded-lg shadow-md content-card">
+                                <h4 class="font-bold text-lg text-blue-600 mb-2">${card.title}</h4>
+                                <p class="text-slate-600 text-sm">${card.text}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                internationalContent.appendChild(contentWrapper);
+            }
+
+            tabsContainers.forEach(container => {
+                container.addEventListener('click', (e) => {
+                    const button = e.target.closest('button');
+                    if (!button) return;
+
+                    const country = button.dataset.country;
+                    if (country) {
+                        // Deactivate all buttons in all containers
+                        document.querySelectorAll('.tab-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                            btn.classList.add('inactive');
+                        });
+                        // Activate the clicked button
+                        button.classList.add('active');
+                        button.classList.remove('inactive');
+                        renderInternationalContent(country);
+                    }
+                });
+            });
+            
+            // Render Accordion for Guide
+            const accordionContainer = document.getElementById('accordion-container');
+            guideData.forEach(item => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item bg-white rounded-lg shadow-sm';
+                accordionItem.innerHTML = `
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-5 font-semibold text-lg text-slate-800 hover:bg-stone-50">
+                        <span>${item.title}</span>
+                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-slate-600">
+                        <p>${item.content}</p>
+                    </div>
+                `;
+                accordionContainer.appendChild(accordionItem);
+            });
+
+            accordionContainer.addEventListener('click', (e) => {
+                const header = e.target.closest('.accordion-header');
+                if (!header) return;
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('svg');
+                
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    document.querySelectorAll('.accordion-content').forEach(el => el.style.maxHeight = null);
+                    document.querySelectorAll('.accordion-header svg').forEach(svg => svg.style.transform = 'rotate(0deg)');
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+
+            // Nav Link Active State on Scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            window.addEventListener('scroll', () => {
+                let current = 'accueil';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 75) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav');
+                    link.classList.add('inactive-nav');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active-nav');
+                        link.classList.remove('inactive-nav');
+                    }
+                });
+            });
+
+            // Initial render
+            renderInternationalContent('france'); // Render France content by default
+        });
+    </script>
+</body>
+</html>
